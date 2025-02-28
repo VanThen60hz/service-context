@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	sctx "github.com/VanThen60hz/service-context"
+
 	"github.com/VanThen60hz/service-context/component/logger"
 	"github.com/VanThen60hz/service-context/core"
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,15 +14,8 @@ import (
 	s32 "github.com/aws/aws-sdk-go/service/s3"
 )
 
-var (
-	ErrS3ApiKeyMissing       = core.CustomError("ErrS3ApiKeyMissing", "AWS S3 API key is missing")
-	ErrS3ApiSecretKeyMissing = core.CustomError("ErrS3ApiSecretKeyMissing", "AWS S3 API secret key is missing")
-	ErrS3RegionMissing       = core.CustomError("ErrS3RegionMissing", "AWS S3 region is missing")
-	ErrS3BucketMissing       = core.CustomError("ErrS3ApiKeyMissing", "AWS S3 bucket is missing")
-)
-
 type s3 struct {
-	name   string
+	id     string
 	prefix string
 	logger logger.Logger
 
@@ -37,25 +32,20 @@ type s3Config struct {
 	s3Bucket    string
 }
 
-func New(prefix ...string) *s3 {
+func NewS3(id string, prefix ...string) *s3 {
 	pre := "aws-s3"
-
 	if len(prefix) > 0 {
 		pre = prefix[0]
 	}
 
 	return &s3{
-		name:   "aws-s3",
+		id:     id,
 		prefix: pre,
 	}
 }
 
-func (s *s3) Get() interface{} {
-	return s
-}
-
-func (s *s3) Name() string {
-	return s.name
+func (s *s3) ID() string {
+	return s.id
 }
 
 func (s *s3) InitFlags() {
@@ -65,8 +55,8 @@ func (s *s3) InitFlags() {
 	flag.StringVar(&s.cfg.s3Bucket, fmt.Sprintf("%s-%s", s.GetPrefix(), "bucket"), "", "S3 bucket")
 }
 
-func (s *s3) Configure() error {
-	s.logger = logger.GetCurrent().GetLogger(s.Name())
+func (s *s3) Activate(_ sctx.ServiceContext) error {
+	s.logger = logger.GetCurrent().GetLogger(s.ID())
 
 	if err := s.cfg.check(); err != nil {
 		s.logger.Errorln(err)
@@ -82,11 +72,19 @@ func (s *s3) Configure() error {
 
 	config := aws.NewConfig().WithRegion(s.cfg.s3Region).WithCredentials(credential)
 	ss, err := session.NewSession(config)
-	service := s32.New(ss, config)
+	if err != nil {
+		s.logger.Errorln(err)
+		return err
+	}
 
+	s.service = s32.New(ss, config)
 	s.session = ss
-	s.service = service
 
+	return nil
+}
+
+func (s *s3) Stop() error {
+	// Implement any cleanup logic if necessary
 	return nil
 }
 
@@ -94,28 +92,18 @@ func (s *s3) GetPrefix() string {
 	return s.prefix
 }
 
-func (s *s3) Run() error {
-	return s.Configure()
-}
-
-func (s *s3) Stop() <-chan bool {
-	c := make(chan bool)
-	go func() { c <- true }()
-	return c
-}
-
 func (cfg *s3Config) check() error {
 	if len(cfg.s3ApiKey) < 1 {
-		return ErrS3ApiKeyMissing
+		return core.ErrS3ApiKeyMissing
 	}
 	if len(cfg.s3ApiSecret) < 1 {
-		return ErrS3ApiSecretKeyMissing
+		return core.ErrS3ApiSecretKeyMissing
 	}
 	if len(cfg.s3Bucket) < 1 {
-		return ErrS3BucketMissing
+		return core.ErrS3BucketMissing
 	}
 	if len(cfg.s3Region) < 1 {
-		return ErrS3RegionMissing
+		return core.ErrS3RegionMissing
 	}
 	return nil
 }

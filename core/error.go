@@ -6,6 +6,13 @@ import (
 )
 
 var (
+	ErrS3ApiKeyMissing       = CustomError("ErrS3ApiKeyMissing", "AWS S3 API key is missing")
+	ErrS3ApiSecretKeyMissing = CustomError("ErrS3ApiSecretKeyMissing", "AWS S3 API secret key is missing")
+	ErrS3RegionMissing       = CustomError("ErrS3RegionMissing", "AWS S3 region is missing")
+	ErrS3BucketMissing       = CustomError("ErrS3BucketMissing", "AWS S3 bucket is missing")
+)
+
+var (
 	ErrRequestDataInvalid     = func(s string) *customError { return CustomError("ErrRequestDataInvalid", s) }
 	ErrNoPermission           = CustomError("ErrNoPermission", "you don't have permission to access")
 	ErrUsernamePasswordBlank  = CustomError("ErrUsernamePasswordBlank", "username and password cannot be blank")
