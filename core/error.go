@@ -10,6 +10,7 @@ var (
 	ErrS3ApiSecretKeyMissing = CustomError("ErrS3ApiSecretKeyMissing", "AWS S3 API secret key is missing")
 	ErrS3RegionMissing       = CustomError("ErrS3RegionMissing", "AWS S3 region is missing")
 	ErrS3BucketMissing       = CustomError("ErrS3BucketMissing", "AWS S3 bucket is missing")
+	ErrS3DomainMissing       = CustomError("ErrS3DomainMissing", "AWS S3 domain is missing")
 )
 
 var (

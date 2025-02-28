@@ -30,6 +30,7 @@ type s3Config struct {
 	s3ApiSecret string
 	s3Region    string
 	s3Bucket    string
+	s3Domain    string
 }
 
 func NewS3(id string, prefix ...string) *s3 {
@@ -53,6 +54,7 @@ func (s *s3) InitFlags() {
 	flag.StringVar(&s.cfg.s3ApiSecret, fmt.Sprintf("%s-%s", s.GetPrefix(), "api-secret"), "", "S3 API secret key")
 	flag.StringVar(&s.cfg.s3Region, fmt.Sprintf("%s-%s", s.GetPrefix(), "region"), "", "S3 region")
 	flag.StringVar(&s.cfg.s3Bucket, fmt.Sprintf("%s-%s", s.GetPrefix(), "bucket"), "", "S3 bucket")
+	flag.StringVar(&s.cfg.s3Domain, fmt.Sprintf("%s-%s", s.GetPrefix(), "domain"), "", "S3 domain")
 }
 
 func (s *s3) Activate(_ sctx.ServiceContext) error {
@@ -104,6 +106,9 @@ func (cfg *s3Config) check() error {
 	}
 	if len(cfg.s3Region) < 1 {
 		return core.ErrS3RegionMissing
+	}
+	if len(cfg.s3Domain) < 1 {
+		return core.ErrS3DomainMissing
 	}
 	return nil
 }

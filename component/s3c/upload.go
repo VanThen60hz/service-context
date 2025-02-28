@@ -49,7 +49,7 @@ func (s *s3) Upload(ctx context.Context, fileName string, cloudFolder string) (s
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s.s3.amazonaws.com%s", s.cfg.s3Bucket, fileKey), nil
+	return fmt.Sprintf("https://%s%s", s.cfg.s3Domain, fileKey), nil
 }
 
 func (s *s3) UploadFileData(ctx context.Context, fileData []byte, fileName string) (string, error) {
@@ -70,5 +70,5 @@ func (s *s3) UploadFileData(ctx context.Context, fileData []byte, fileName strin
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s.s3.amazonaws.com%s", s.cfg.s3Bucket, fileKey), nil
+	return fmt.Sprintf("https://%s%s", s.cfg.s3Domain, fileKey), nil
 }
