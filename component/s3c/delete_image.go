@@ -7,18 +7,18 @@ import (
 	s32 "github.com/aws/aws-sdk-go/service/s3"
 )
 
-func (s *s3) DeleteImages(ctx context.Context, fileKeys []string) error {
+func (s *S3Component) DeleteImages(ctx context.Context, fileKeys []string) error {
 	del := &s32.Delete{
 		Objects: toOIDs(fileKeys),
 		Quiet:   aws.Bool(false),
 	}
 
 	doi := &s32.DeleteObjectsInput{
-		Bucket: aws.String(s.cfg.s3Bucket),
+		Bucket: aws.String(s.cfg.bucket),
 		Delete: del,
 	}
 
-	res, err := s.service.DeleteObjects(doi)
+	res, err := s.svc.DeleteObjects(doi)
 	if err != nil {
 		return err
 	}
@@ -39,13 +39,13 @@ func toOIDs(keys []string) []*s32.ObjectIdentifier {
 	return ret
 }
 
-func (s *s3) DeleteObject(ctx context.Context, key string) error {
+func (s *S3Component) DeleteObject(ctx context.Context, key string) error {
 	input := &s32.DeleteObjectInput{
-		Bucket: aws.String(s.cfg.s3Bucket),
+		Bucket: aws.String(s.cfg.bucket),
 		Key:    aws.String(key),
 	}
 
-	res, err := s.service.DeleteObject(input)
+	res, err := s.svc.DeleteObject(input)
 	if err != nil {
 		return err
 	}

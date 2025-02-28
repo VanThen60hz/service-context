@@ -2,113 +2,80 @@ package s3c
 
 import (
 	"flag"
-	"fmt"
 
 	sctx "github.com/VanThen60hz/service-context"
-
-	"github.com/VanThen60hz/service-context/component/logger"
-	"github.com/VanThen60hz/service-context/core"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	s32 "github.com/aws/aws-sdk-go/service/s3"
+	s3 "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/pkg/errors"
 )
 
-type s3 struct {
+type S3Component struct {
 	id     string
-	prefix string
-	logger logger.Logger
-
-	cfg s3Config
-
-	session *session.Session
-	service *s32.S3
+	logger sctx.Logger
+	cfg    s3Config
+	svc    *s3.S3
 }
 
 type s3Config struct {
-	s3ApiKey    string
-	s3ApiSecret string
-	s3Region    string
-	s3Bucket    string
-	s3Domain    string
+	apiKey    string
+	apiSecret string
+	region    string
+	bucket    string
+	domain    string // Added domain field
 }
 
-func NewS3(id string, prefix ...string) *s3 {
-	pre := "aws-s3"
-	if len(prefix) > 0 {
-		pre = prefix[0]
-	}
-
-	return &s3{
-		id:     id,
-		prefix: pre,
-	}
+func NewS3Component(id string) *S3Component {
+	return &S3Component{id: id}
 }
 
-func (s *s3) ID() string {
+func (s *S3Component) ID() string {
 	return s.id
 }
 
-func (s *s3) InitFlags() {
-	flag.StringVar(&s.cfg.s3ApiKey, fmt.Sprintf("%s-%s", s.GetPrefix(), "api-key"), "", "S3 API key")
-	flag.StringVar(&s.cfg.s3ApiSecret, fmt.Sprintf("%s-%s", s.GetPrefix(), "api-secret"), "", "S3 API secret key")
-	flag.StringVar(&s.cfg.s3Region, fmt.Sprintf("%s-%s", s.GetPrefix(), "region"), "", "S3 region")
-	flag.StringVar(&s.cfg.s3Bucket, fmt.Sprintf("%s-%s", s.GetPrefix(), "bucket"), "", "S3 bucket")
-	flag.StringVar(&s.cfg.s3Domain, fmt.Sprintf("%s-%s", s.GetPrefix(), "domain"), "", "S3 domain")
+func (s *S3Component) InitFlags() {
+	flag.StringVar(&s.cfg.apiKey, "s3-api-key", "", "AWS S3 API key")
+	flag.StringVar(&s.cfg.apiSecret, "s3-api-secret", "", "AWS S3 API secret")
+	flag.StringVar(&s.cfg.region, "s3-region", "", "AWS S3 region")
+	flag.StringVar(&s.cfg.bucket, "s3-bucket", "", "AWS S3 bucket")
+	flag.StringVar(&s.cfg.domain, "s3-domain", "s3.amazonaws.com", "AWS S3 domain") // Added domain flag
 }
 
-func (s *s3) Activate(_ sctx.ServiceContext) error {
-	s.logger = logger.GetCurrent().GetLogger(s.ID())
+func (s *S3Component) Activate(ctx sctx.ServiceContext) error {
+	s.logger = ctx.Logger(s.id)
 
-	if err := s.cfg.check(); err != nil {
-		s.logger.Errorln(err)
+	if err := s.cfg.validate(); err != nil {
 		return err
 	}
 
-	credential := credentials.NewStaticCredentials(s.cfg.s3ApiKey, s.cfg.s3ApiSecret, "")
-	_, err := credential.Get()
+	creds := credentials.NewStaticCredentials(s.cfg.apiKey, s.cfg.apiSecret, "")
+	awsConfig := aws.NewConfig().WithRegion(s.cfg.region).WithCredentials(creds)
+	sess, err := session.NewSession(awsConfig)
 	if err != nil {
-		s.logger.Errorln(err)
-		return err
+		return errors.Wrap(err, "failed to create AWS session")
 	}
 
-	config := aws.NewConfig().WithRegion(s.cfg.s3Region).WithCredentials(credential)
-	ss, err := session.NewSession(config)
-	if err != nil {
-		s.logger.Errorln(err)
-		return err
-	}
-
-	s.service = s32.New(ss, config)
-	s.session = ss
-
+	s.svc = s3.New(sess)
 	return nil
 }
 
-func (s *s3) Stop() error {
-	// Implement any cleanup logic if necessary
+func (s *S3Component) Stop() error {
 	return nil
 }
 
-func (s *s3) GetPrefix() string {
-	return s.prefix
-}
-
-func (cfg *s3Config) check() error {
-	if len(cfg.s3ApiKey) < 1 {
-		return core.ErrS3ApiKeyMissing
+func (cfg *s3Config) validate() error {
+	if cfg.apiKey == "" {
+		return errors.New("AWS S3 API key is missing")
 	}
-	if len(cfg.s3ApiSecret) < 1 {
-		return core.ErrS3ApiSecretKeyMissing
+	if cfg.apiSecret == "" {
+		return errors.New("AWS S3 API secret is missing")
 	}
-	if len(cfg.s3Bucket) < 1 {
-		return core.ErrS3BucketMissing
+	if cfg.region == "" {
+		return errors.New("AWS S3 region is missing")
 	}
-	if len(cfg.s3Region) < 1 {
-		return core.ErrS3RegionMissing
-	}
-	if len(cfg.s3Domain) < 1 {
-		return core.ErrS3DomainMissing
+	if cfg.bucket == "" {
+		return errors.New("AWS S3 bucket is missing")
 	}
 	return nil
 }

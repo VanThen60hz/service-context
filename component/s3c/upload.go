@@ -10,17 +10,20 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	s32 "github.com/aws/aws-sdk-go/service/s3"
+	s3 "github.com/aws/aws-sdk-go/service/s3"
 )
 
-func (s *s3) Upload(ctx context.Context, fileName string, cloudFolder string) (string, error) {
+func (s *S3Component) Upload(ctx context.Context, fileName string, cloudFolder string) (string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return "", err
 	}
 	defer file.Close()
 
-	fileInfo, _ := file.Stat()
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return "", err
+	}
 	size := fileInfo.Size()
 	buffer := make([]byte, size)
 
@@ -36,39 +39,39 @@ func (s *s3) Upload(ctx context.Context, fileName string, cloudFolder string) (s
 	newFileName := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
 
 	fileKey := fmt.Sprintf("/%s/%s", cloudFolder, newFileName)
-	params := &s32.PutObjectInput{
-		Bucket:        aws.String(s.cfg.s3Bucket),
+	params := &s3.PutObjectInput{
+		Bucket:        aws.String(s.cfg.bucket),
 		Key:           aws.String(fileKey),
 		Body:          fileBytes,
 		ContentLength: aws.Int64(size),
 		ContentType:   aws.String(fileType),
 	}
 
-	_, err = s.service.PutObjectWithContext(ctx, params)
+	_, err = s.svc.PutObjectWithContext(ctx, params)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s%s", s.cfg.s3Domain, fileKey), nil
+	return fmt.Sprintf("https://%s.%s%s", s.cfg.bucket, s.cfg.domain, fileKey), nil
 }
 
-func (s *s3) UploadFileData(ctx context.Context, fileData []byte, fileName string) (string, error) {
+func (s *S3Component) UploadFileData(ctx context.Context, fileData []byte, fileName string) (string, error) {
 	fileBytes := bytes.NewReader(fileData)
 	fileType := http.DetectContentType(fileData)
 
 	fileKey := fmt.Sprintf("/%s", fileName)
-	params := &s32.PutObjectInput{
-		Bucket:        aws.String(s.cfg.s3Bucket),
+	params := &s3.PutObjectInput{
+		Bucket:        aws.String(s.cfg.bucket),
 		Key:           aws.String(fileKey),
 		Body:          fileBytes,
 		ContentLength: aws.Int64(int64(len(fileData))),
 		ContentType:   aws.String(fileType),
 	}
 
-	_, err := s.service.PutObjectWithContext(ctx, params)
+	_, err := s.svc.PutObjectWithContext(ctx, params)
 	if err != nil {
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s%s", s.cfg.s3Domain, fileKey), nil
+	return fmt.Sprintf("https://%s.%s%s", s.cfg.bucket, s.cfg.domain, fileKey), nil
 }
