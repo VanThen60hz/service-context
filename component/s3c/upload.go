@@ -73,5 +73,5 @@ func (s *S3Component) UploadFileData(ctx context.Context, fileData []byte, fileN
 		return "", err
 	}
 
-	return fmt.Sprintf("https://%s%s", s.cfg.bucket, s.cfg.domain, fileKey), nil
+	return fmt.Sprintf("https://%s%s", s.cfg.domain, fileKey), nil
 }

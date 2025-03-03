@@ -1,5 +1,3 @@
-// Copyright (c) 2023, Viet Tran, 200Lab Team.
-
 package sctx
 
 import (

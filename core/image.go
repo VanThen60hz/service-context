@@ -4,21 +4,23 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/pkg/errors"
 )
 
 type Image struct {
-	Id       int    `json:"id" gorm:"column:id;" db:"id"`
-	FileName string `json:"file_name" gorm:"column:file_name;" db:"file_name"`
-	Width    int    `json:"width" gorm:"column:width;" db:"width"`
-	Height   int    `json:"height" gorm:"column:height;" db:"height"`
-	Provider string `json:"provider,omitempty" gorm:"column:provider;" db:"provider"`
+	Id        int64  `json:"id" gorm:"column:id;" db:"id"`
+	Url       string `json:"url" gorm:"column:url;" db:"url"`
+	Width     int64  `json:"width" gorm:"column:width;" db:"width"`
+	Height    int64  `json:"height" gorm:"column:height;" db:"height"`
+	Extension string `json:"extension" gorm:"column:extension;" db:"extension"`
 }
 
 func (*Image) TableName() string { return "images" }
 
 func (img *Image) Fulfill(domain string) {
-	img.FileName = fmt.Sprintf("%s/%s", domain, img.FileName)
+	img.Url = fmt.Sprintf("%s/%s", domain, strings.Split(img.Url, "/")[1])
 }
 
 func (img *Image) Scan(value interface{}) error {

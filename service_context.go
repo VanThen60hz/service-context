@@ -1,13 +1,12 @@
-// Copyright (c) 2023, Viet Tran, 200Lab Team.
-
 package sctx
 
 import (
 	"flag"
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 const (

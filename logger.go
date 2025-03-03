@@ -1,14 +1,13 @@
-// Copyright (c) 2023, Viet Tran, 200Lab Team.
-
 package sctx
 
 import (
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"log"
 	"runtime"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Fields logrus.Fields
@@ -55,7 +54,6 @@ func (l *logger) GetLevel() string {
 }
 
 func (l *logger) debugSrc() *logrus.Entry {
-
 	if _, ok := l.Entry.Data["source"]; ok {
 		return l.Entry
 	}
@@ -109,7 +107,6 @@ func (l *logger) WithSrc() Logger {
 
 func mustParseLevel(level string) logrus.Level {
 	lv, err := logrus.ParseLevel(level)
-
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -117,12 +114,10 @@ func mustParseLevel(level string) logrus.Level {
 	return lv
 }
 
-var (
-	defaultLogger = newAppLogger(&Config{
-		BasePrefix:   "core",
-		DefaultLevel: "trace",
-	})
-)
+var defaultLogger = newAppLogger(&Config{
+	BasePrefix:   "core",
+	DefaultLevel: "trace",
+})
 
 type AppLogger interface {
 	GetLogger(prefix string) Logger
