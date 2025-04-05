@@ -15,4 +15,6 @@ type S3 interface {
 	DeleteImages(ctx context.Context, fileKeys []string) error
 	// Delete any object
 	DeleteObject(ctx context.Context, key string) error
+	// Get presigned URL for downloading file
+	GetPresignedURL(ctx context.Context, key string, duration time.Duration) (string, error)
 }
