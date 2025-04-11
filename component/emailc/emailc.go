@@ -34,7 +34,7 @@ func (e *EmailComponent) InitFlags() {
 	flag.StringVar(&e.cfg.smtpHost, "email-smtp-host", "smtp.gmail.com", "SMTP server host")
 	flag.IntVar(&e.cfg.smtpPort, "email-smtp-port", 587, "SMTP server port")
 	flag.StringVar(&e.cfg.emailUser, "email-user", "", "Email username")
-	flag.StringVar(&e.cfg.emailPass, "email-pass", "", "Email password")
+	flag.StringVar(&e.cfg.emailPass, "email-password", "", "Email password")
 	flag.StringVar(&e.cfg.templatePath, "email-template-path", "component/emailc/templates", "Email templates path")
 }
 
