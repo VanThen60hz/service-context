@@ -11,11 +11,10 @@ import (
 func (e *EmailComponent) SendGenericOTP(ctx context.Context, toEmail, subject string, data OTPMailData) error {
 	auth := smtp.PlainAuth("", e.cfg.emailUser, e.cfg.emailPass, e.cfg.smtpHost)
 
-	// Load HTML template
-	tmplPath := e.getTemplatePath("otp.html")
-	tmpl, err := template.ParseFiles(tmplPath)
+	// Parse embedded template
+	tmpl, err := template.New("otp").Parse(otpTemplate)
 	if err != nil {
-		return fmt.Errorf("error loading template: %w", err)
+		return fmt.Errorf("error parsing template: %w", err)
 	}
 
 	var body bytes.Buffer

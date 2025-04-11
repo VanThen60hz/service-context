@@ -2,7 +2,6 @@ package emailc
 
 import (
 	"flag"
-	"path/filepath"
 
 	sctx "github.com/VanThen60hz/service-context"
 	"github.com/pkg/errors"
@@ -15,11 +14,10 @@ type EmailComponent struct {
 }
 
 type emailConfig struct {
-	smtpHost     string
-	smtpPort     int
-	emailUser    string
-	emailPass    string
-	templatePath string
+	smtpHost  string
+	smtpPort  int
+	emailUser string
+	emailPass string
 }
 
 func NewEmailComponent(id string) *EmailComponent {
@@ -35,7 +33,6 @@ func (e *EmailComponent) InitFlags() {
 	flag.IntVar(&e.cfg.smtpPort, "email-smtp-port", 587, "SMTP server port")
 	flag.StringVar(&e.cfg.emailUser, "email-user", "", "Email username")
 	flag.StringVar(&e.cfg.emailPass, "email-password", "", "Email password")
-	flag.StringVar(&e.cfg.templatePath, "email-template-path", "component/emailc/templates", "Email templates path")
 }
 
 func (e *EmailComponent) Activate(ctx sctx.ServiceContext) error {
@@ -60,8 +57,4 @@ func (cfg *emailConfig) validate() error {
 		return errors.New("email password is missing")
 	}
 	return nil
-}
-
-func (e *EmailComponent) getTemplatePath(name string) string {
-	return filepath.Join(e.cfg.templatePath, name)
 }
