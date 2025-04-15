@@ -15,6 +15,8 @@ type OAuth interface {
 	ProcessGoogleCallback(ctx context.Context, code string, state string) (*OAuthUserInfo, error)
 	// ProcessFacebookCallback processes the Facebook OAuth callback
 	ProcessFacebookCallback(ctx context.Context, code string, state string) (*OAuthUserInfo, error)
+	// GetStateString returns the current OAuth state string
+	GetStateString() string
 }
 
 // OAuthUserInfo represents the user information returned from OAuth providers
