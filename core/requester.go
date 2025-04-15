@@ -2,7 +2,10 @@ package core
 
 import "context"
 
-const KeyRequester = "requester"
+// Define a custom type for the context key
+type contextKey string
+
+const KeyRequester contextKey = "requester"
 
 type Requester interface {
 	GetSubject() string
