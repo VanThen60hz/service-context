@@ -13,7 +13,7 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
-func (o *OAuthComponent) GetGoogleAuthURL(state string) string {
+func (o *OAuthComponent) GetGoogleAuthURL() string {
 	config := &oauth2.Config{
 		ClientID:     o.cfg.googleClientID,
 		ClientSecret: o.cfg.googleClientSecret,
@@ -24,10 +24,10 @@ func (o *OAuthComponent) GetGoogleAuthURL(state string) string {
 		},
 		Endpoint: google.Endpoint,
 	}
-	return config.AuthCodeURL(state)
+	return config.AuthCodeURL(o.state)
 }
 
-func (o *OAuthComponent) GetFacebookAuthURL(state string) string {
+func (o *OAuthComponent) GetFacebookAuthURL() string {
 	config := &oauth2.Config{
 		ClientID:     o.cfg.facebookClientID,
 		ClientSecret: o.cfg.facebookClientSecret,
@@ -41,7 +41,7 @@ func (o *OAuthComponent) GetFacebookAuthURL(state string) string {
 	opts := []oauth2.AuthCodeOption{
 		oauth2.SetAuthURLParam("auth_type", "rerequest"),
 	}
-	return config.AuthCodeURL(state, opts...)
+	return config.AuthCodeURL(o.state, opts...)
 }
 
 func (o *OAuthComponent) ProcessGoogleCallback(ctx context.Context, code string, state string) (*OAuthUserInfo, error) {

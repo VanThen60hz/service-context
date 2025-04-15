@@ -7,16 +7,14 @@ import (
 )
 
 type OAuth interface {
-	// GetGoogleAuthURL returns the Google OAuth URL
-	GetGoogleAuthURL(state string) string
-	// GetFacebookAuthURL returns the Facebook OAuth URL
-	GetFacebookAuthURL(state string) string
+	// GetGoogleAuthURL returns the Google OAuth URL with state parameter
+	GetGoogleAuthURL() string
+	// GetFacebookAuthURL returns the Facebook OAuth URL with state parameter
+	GetFacebookAuthURL() string
 	// ProcessGoogleCallback processes the Google OAuth callback
 	ProcessGoogleCallback(ctx context.Context, code string, state string) (*OAuthUserInfo, error)
 	// ProcessFacebookCallback processes the Facebook OAuth callback
 	ProcessFacebookCallback(ctx context.Context, code string, state string) (*OAuthUserInfo, error)
-	// GetStateString returns the current OAuth state string
-	GetStateString() string
 }
 
 // OAuthUserInfo represents the user information returned from OAuth providers

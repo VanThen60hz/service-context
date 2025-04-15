@@ -37,10 +37,6 @@ func (o *OAuthComponent) ID() string {
 	return o.id
 }
 
-func (o *OAuthComponent) GetStateString() string {
-	return o.state
-}
-
 func (o *OAuthComponent) InitFlags() {
 	flag.StringVar(&o.cfg.googleClientID, "google-client-id", "", "Google OAuth client ID")
 	flag.StringVar(&o.cfg.googleClientSecret, "google-client-secret", "", "Google OAuth client secret")
