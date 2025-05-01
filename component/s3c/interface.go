@@ -2,6 +2,7 @@ package s3c
 
 import (
 	"context"
+	"os"
 	"time"
 )
 
@@ -17,4 +18,6 @@ type S3 interface {
 	DeleteObject(ctx context.Context, key string) error
 	// Get presigned URL for downloading file
 	GetPresignedURL(ctx context.Context, key string, duration time.Duration) (string, error)
+	// Download file from S3
+	Download(ctx context.Context, key string) (*os.File, error)
 }
