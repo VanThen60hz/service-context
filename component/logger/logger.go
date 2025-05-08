@@ -1,11 +1,15 @@
+// Logging provider
+//
+// Log only fully init when app.Run() called
 package logger
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"log"
 	"runtime"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Fields logrus.Fields
@@ -66,7 +70,6 @@ func (l *logger) GetLevel() string {
 }
 
 func (l *logger) debugSrc() *logrus.Entry {
-
 	if _, ok := l.Entry.Data["source"]; ok {
 		return l.Entry
 	}

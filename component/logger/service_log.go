@@ -5,15 +5,13 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/x-cray/logrus-prefixed-formatter"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
-var (
-	DefaultStdLogger = NewAppLogService(&Config{
-		BasePrefix:   "core",
-		DefaultLevel: "trace",
-	})
-)
+var DefaultStdLogger = NewAppLogService(&Config{
+	BasePrefix:   "core",
+	DefaultLevel: "trace",
+})
 
 type Config struct {
 	DefaultLevel string
@@ -37,7 +35,7 @@ func NewAppLogService(config *Config) *stdLogger {
 		config = &Config{}
 	}
 
-	//flag.StringVar(&config.DefaultLevel, "log-level", "info", "Log level: panic | fatal | error | warn | info | debug | trace")
+	// flag.StringVar(&config.DefaultLevel, "log-level", "info", "Log level: panic | fatal | error | warn | info | debug | trace")
 
 	if config.DefaultLevel == "" {
 		config.DefaultLevel = "info"
@@ -75,9 +73,11 @@ func (s *stdLogger) GetLogger(prefix string) Logger {
 
 // Implement Runnable interface
 func (s *stdLogger) Name() string { return "file-logger" }
+
 func (s *stdLogger) InitFlags() {
 	flag.StringVar(&s.logLevel, "log-level", s.cfg.DefaultLevel, "Log level: panic | fatal | error | warn | info | debug | trace")
 }
+
 func (s *stdLogger) Configure() error {
 	lv := mustParseLevel(s.logLevel)
 	s.logger.SetLevel(lv)

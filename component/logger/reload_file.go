@@ -14,7 +14,7 @@ type reloadFile struct {
 }
 
 func newReloadFile(path string) (*reloadFile, error) {
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func newReloadFile(path string) (*reloadFile, error) {
 }
 
 func (r *reloadFile) ReOpen() error {
-	f, err := os.OpenFile(r.fname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(r.fname, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0o644)
 
 	pOld := atomic.SwapPointer(&r.pFile, unsafe.Pointer(f))
 	f = (*os.File)(pOld)

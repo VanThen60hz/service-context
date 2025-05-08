@@ -2,15 +2,14 @@ package logger
 
 import (
 	"flag"
+
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	DefaultMessageLogger = NewMessageLogService(&Config{
-		BasePrefix:   "core",
-		DefaultLevel: "info",
-	})
-)
+var DefaultMessageLogger = NewMessageLogService(&Config{
+	BasePrefix:   "core",
+	DefaultLevel: "info",
+})
 
 // Used to log message that need send to remote such as Elastic Search
 type messageLogger struct {
@@ -53,7 +52,6 @@ func (m *messageLogger) InitFlags() {
 }
 
 func (m *messageLogger) Configure() error {
-
 	if m.logPath == "" {
 		lv := mustParseLevel(m.stdLogger.cfg.DefaultLevel)
 		m.stdLogger.logger.SetLevel(lv)
