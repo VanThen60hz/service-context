@@ -1,14 +1,9 @@
 package natsc
 
 import (
-	"context"
-	"encoding/json"
 	"flag"
-	"fmt"
-	"time"
 
 	sctx "github.com/VanThen60hz/service-context"
-	pb "github.com/VanThen60hz/service-context/component/pubsub"
 	"github.com/nats-io/nats.go"
 )
 
@@ -92,49 +87,4 @@ func (n *NatsComponent) Stop() error {
 	}
 	n.isRunning = false
 	return nil
-}
-
-func (n *NatsComponent) Publish(ctx context.Context, channel pb.Channel, data *pb.Event) error {
-	dataByte, err := json.Marshal(data.Data)
-	if err != nil {
-		n.logger.Errorln(err)
-		return err
-	}
-
-	if err := n.nc.Publish(string(channel), dataByte); err != nil {
-		n.logger.Errorln(err)
-		return err
-	}
-
-	return nil
-}
-
-func (n *NatsComponent) Subscribe(ctx context.Context, channel pb.Channel, eventTitle string) (c <-chan *pb.Event, cl func()) {
-	ch := make(chan *pb.Event)
-
-	sub, err := n.nc.Subscribe(string(channel), func(msg *nats.Msg) {
-		var data interface{}
-		if err := json.Unmarshal(msg.Data, &data); err != nil {
-			n.logger.Errorln("Error unmarshaling message:", err)
-			return
-		}
-
-		evt := &pb.Event{
-			Id:         fmt.Sprintf("%d", time.Now().UnixNano()),
-			Title:      eventTitle,
-			Channel:    channel,
-			RemoteData: msg.Data,
-			Data:       data,
-			CreatedAt:  time.Now().UTC(),
-		}
-		ch <- evt
-	})
-	if err != nil {
-		n.logger.Errorln(err)
-	}
-
-	return ch, func() {
-		_ = sub.Unsubscribe()
-		close(ch)
-	}
 }
