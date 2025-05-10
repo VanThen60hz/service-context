@@ -6,24 +6,25 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/VanThen60hz/service-context/component/logger"
+	sctx "github.com/VanThen60hz/service-context"
 	"github.com/VanThen60hz/service-context/component/natsc"
 	"github.com/VanThen60hz/service-context/component/pubsub"
 )
 
 func main() {
-	// Initialize logger first
-	logger.InitServLogger(false)
+	// Create service context
+	ctx := sctx.NewServiceContext()
 
 	// Initialize NATS component
-	natsComp := natsc.NewNatsComponent("nats", "")
+	natsComp := natsc.NewNatsComponent("nats")
 	natsComp.InitFlags()
 
 	// Set NATS server address via flag
 	flag.Set("nats-server", "nats://localhost:4222")
 	flag.Parse()
 
-	if err := natsComp.Run(); err != nil {
+	// Activate NATS component
+	if err := natsComp.Activate(ctx); err != nil {
 		panic(err)
 	}
 	defer natsComp.Stop()
