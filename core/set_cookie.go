@@ -68,7 +68,7 @@ func mergeCookieOptions(defaultOpts CookieOptions, customOpts ...CookieOptions) 
 	return opts
 }
 
-// SetCookie sets a cookie with the given name, value and options
+// SetCookie sets a cookie with the given name, value and options (production)
 func SetCookie(c *gin.Context, name, value string, opts CookieOptions) {
 	secure := opts.Secure
 	if secure {
@@ -87,6 +87,24 @@ func SetCookie(c *gin.Context, name, value string, opts CookieOptions) {
 	})
 }
 
+// SetDevelopmentCookie sets a cookie for development (localhost, HTTP)
+func SetDevelopmentCookie(c *gin.Context, name, value string, opts CookieOptions) {
+	opts.Secure = false
+	if opts.SameSite == http.SameSiteNoneMode {
+		opts.SameSite = http.SameSiteLaxMode
+	}
+	http.SetCookie(c.Writer, &http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     opts.Path,
+		Domain:   opts.Domain,
+		MaxAge:   opts.MaxAge,
+		HttpOnly: opts.HttpOnly,
+		Secure:   opts.Secure,
+		SameSite: opts.SameSite,
+	})
+}
+
 // SetAccessTokenCookie sets the access token cookie with standard configuration
 func SetAccessTokenCookie(c *gin.Context, token string, path string, opts ...CookieOptions) {
 	options := mergeCookieOptions(DefaultCookieOptions(path), opts...)
@@ -96,6 +114,16 @@ func SetAccessTokenCookie(c *gin.Context, token string, path string, opts ...Coo
 // SetAccessTokenCookieWithDefaultPath sets the access token cookie with default path
 func SetAccessTokenCookieWithDefaultPath(c *gin.Context, token string, opts ...CookieOptions) {
 	SetAccessTokenCookie(c, token, defaultCookiePath, opts...)
+}
+
+// SetAccessTokenCookieForDevelopment sets the access token cookie for local development
+func SetAccessTokenCookieForDevelopment(c *gin.Context, token string, path string, opts ...CookieOptions) {
+	options := mergeCookieOptions(DefaultCookieOptions(path), opts...)
+	options.Secure = false
+	if options.SameSite == http.SameSiteNoneMode {
+		options.SameSite = http.SameSiteLaxMode
+	}
+	SetDevelopmentCookie(c, accessTokenCookieName, token, options)
 }
 
 // ClearAccessTokenCookie clears the access token cookie
